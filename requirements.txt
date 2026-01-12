@@ -1,0 +1,37 @@
+# =============================================================================
+# AGENTE - Dependencias
+# =============================================================================
+# Instalación: pip install -r requirements.txt
+# Última actualización: Enero 2026
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# CORE: LLM y Validación
+# -----------------------------------------------------------------------------
+anthropic>=0.42.0          # SDK oficial de Anthropic (sin abstracciones)
+pydantic>=2.10.0           # Validación estricta de contratos de datos
+pydantic-settings>=2.7.0   # Gestión de configuración desde .env
+
+# -----------------------------------------------------------------------------
+# API y Servidor
+# -----------------------------------------------------------------------------
+fastapi>=0.115.0           # Framework web asíncrono
+uvicorn[standard]>=0.34.0  # Servidor ASGI de producción
+httpx>=0.28.0              # Cliente HTTP async (para health checks)
+
+# -----------------------------------------------------------------------------
+# Base de Datos
+# -----------------------------------------------------------------------------
+aiosqlite>=0.20.0          # SQLite asíncrono para el CRM simulado
+
+# -----------------------------------------------------------------------------
+# Observabilidad y CLI
+# -----------------------------------------------------------------------------
+rich>=13.9.0               # Logs visuales en consola (latencia, costes)
+structlog>=24.4.0          # Logging estructurado para auditoría
+
+# -----------------------------------------------------------------------------
+# Utilidades
+# -----------------------------------------------------------------------------
+python-dotenv>=1.0.0       # Carga de variables de entorno
+tenacity>=9.0.0            # Reintentos con backoff exponencial
