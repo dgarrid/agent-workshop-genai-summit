@@ -1,4 +1,4 @@
-# Nexus Agent 🤖
+# Creando un Agente con arquitectura de producción en 3 horas
 
 ![Python](https://img.shields.io/badge/Python-3.11-blue?style=for-the-badge&logo=python)
 ![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker)
@@ -10,7 +10,7 @@
 
 ---
 
-## 📖 Propósito
+## Propósito
 
 La mayoría de los agentes de IA fallan en producción por tres razones:
 
@@ -20,7 +20,7 @@ La mayoría de los agentes de IA fallan en producción por tres razones:
 | ❌ **Costes descontrolados** | Bucles infinitos que queman presupuesto |
 | ❌ **Opacidad** | Cajas negras inauditables para negocio o legal |
 
-**Nexus Agent** resuelve estos problemas mediante un enfoque de **Defensa en Profundidad**:
+La metoología presentada en este taller resuelve estos problemas mediante un enfoque de **Defensa en Profundidad**:
 
 1. **Validación Estricta** — Uso de `Pydantic` para garantizar contratos de datos en entrada y salida
 2. **Estándar de Herramientas** — Implementación del **Model Context Protocol (MCP)** para desacoplar la lógica del LLM de las integraciones
@@ -29,12 +29,12 @@ La mayoría de los agentes de IA fallan en producción por tres razones:
 
 ---
 
-## 🏗️ Estructura del Proyecto
+## Estructura del Proyecto
 
 Arquitectura hexagonal simplificada para separar infraestructura, dominio e interfaces.
 
 ```
-nexus-agent/
+agente/
 │
 ├── .devcontainer/          # Configuración para GitHub Codespaces
 │
@@ -70,7 +70,7 @@ nexus-agent/
 
 ---
 
-## 🛠️ Stack Tecnológico
+## Stack Tecnológico
 
 | Tecnología | Propósito |
 |------------|-----------|
@@ -84,7 +84,7 @@ nexus-agent/
 
 ---
 
-## ⚡ Inicio Rápido
+## Inicio Rápido
 
 ### Requisitos Previos
 
@@ -126,7 +126,7 @@ python data/setup_data.py
 
 ---
 
-## 🚀 Uso
+## Uso
 
 ### Fase 1: CLI (Desarrollo)
 
@@ -144,7 +144,7 @@ Levantar el servidor FastAPI:
 uvicorn src.main:app --reload
 ```
 
-📄 Documentación automática en: `http://localhost:8000/docs`
+Documentación automática en: `http://localhost:8000/docs`
 
 ### Fase 3: Docker (Cloud)
 
@@ -158,7 +158,7 @@ docker run -p 8080:8080 -e ANTHROPIC_API_KEY=tu-key nexus-agent
 
 ---
 
-## 🧪 Escenarios de Prueba
+## Escenarios de Prueba
 
 Stress tests para validar la robustez del sistema:
 
@@ -171,7 +171,7 @@ Stress tests para validar la robustez del sistema:
 
 ---
 
-## 📅 Roadmap del Taller (3 Horas)
+## Roadmap del Taller (3 Horas)
 
 | Tiempo | Módulo | Contenido |
 |--------|--------|-----------|
@@ -181,6 +181,6 @@ Stress tests para validar la robustez del sistema:
 
 ---
 
-## 📄 Licencia
+## Licencia
 
 MIT © 2026 — GenAI Summit Workshop
