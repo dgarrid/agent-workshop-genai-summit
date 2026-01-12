@@ -1,0 +1,34 @@
+--- SEGURIDAD ---
+
+.env
+.env.local
+*.key
+secrets.json
+
+--- PYTHON ---
+
+pycache/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+env/
+
+--- DATOS GENERADOS ---
+
+Ignoramos la DB y logs para obligar al alumno a generarlos
+
+data/*.db
+logs/
+*.log
+*.jsonl
+
+--- IDE ---
+
+.vscode/
+.idea/
+.DS_Store
+
+--- DOCKER ---
+
+.docker/
