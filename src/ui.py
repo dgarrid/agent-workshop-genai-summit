@@ -10,7 +10,8 @@ Proporciona una experiencia visual tipo chat con:
 import sys
 import os
 import asyncio
-from datetime import datetime
+from datetime import datetime, timezone
+import nest_asyncio
 
 # --- HACK DEL TALLER: Path Setup ---
 # Esto permite ejecutar 'streamlit run src/ui.py' sin líos de PYTHONPATH
@@ -148,7 +149,8 @@ if prompt := st.chat_input("Escribe tu consulta..."):
         
         try:
             # Llamada al agente (Async wrapper)
-            response = asyncio.run(run_agent(prompt))
+            nest_asyncio.apply()
+            response = nest_asyncio.run(run_agent(prompt))
             
             # Procesar éxito
             status_container.update(label="✅ Completado", state="complete", expanded=False)

@@ -10,7 +10,7 @@ y ver los logs de ejecución, costes y decisiones en tiempo real.
 
 import asyncio
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 
 from rich.console import Console
 from rich.panel import Panel
@@ -172,7 +172,7 @@ class CLI:
         while True:
             try:
                 # Prompt con presupuesto
-                remaining = self.settings.budget_limit_eur
+                remaining = self.settings.budget_limit_eur - self.total_spent_eur
                 prompt_text = f"[€{remaining:.2f}] Tu mensaje"
                 
                 user_input = Prompt.ask(f"\n[bold cyan]{prompt_text}[/bold cyan]")

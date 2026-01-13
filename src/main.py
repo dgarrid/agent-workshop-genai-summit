@@ -11,7 +11,7 @@ Endpoints:
 """
 
 import asyncio
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional
 from contextlib import asynccontextmanager
 
@@ -215,7 +215,7 @@ async def health_check():
     
     return HealthResponse(
         status="healthy",
-        timestamp=datetime.utcnow().isoformat(),
+        timestamp=datetime.now(timezone.utc).isoformat(),
         model=settings.anthropic_model,
         tools_available=list_available_tools(),
     )

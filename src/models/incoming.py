@@ -12,7 +12,7 @@ Principio: Si no pasa validación, no entra al agente.
 """
 
 import re
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from typing import Optional
 from pydantic import BaseModel, Field, field_validator, model_validator
@@ -83,7 +83,7 @@ class EmailInput(BaseModel):
     )
     
     received_at: datetime = Field(
-        default_factory=datetime.utcnow,
+        default_factory=datetime.now(timezone.utc),
         description="Timestamp de recepción (UTC)",
     )
     
@@ -183,7 +183,7 @@ class WebhookInput(BaseModel):
     )
     
     timestamp: datetime = Field(
-        default_factory=datetime.utcnow,
+        default_factory=datetime.now(timezone.utc),
         description="Timestamp del evento (UTC)",
     )
     
@@ -276,12 +276,12 @@ class AgentRequest(BaseModel):
     )
     
     request_id: str = Field(
-        default_factory=lambda: datetime.utcnow().strftime("%Y%m%d%H%M%S%f"),
+        default_factory=lambda: datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S%f"),
         description="ID único de la request",
     )
     
     created_at: datetime = Field(
-        default_factory=datetime.utcnow,
+        default_factory=datetime.now(timezone.utc),
         description="Timestamp de creación",
     )
     

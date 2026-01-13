@@ -13,7 +13,7 @@ from typing import Any, Callable
 
 from src.tools.crm import crm_lookup
 from src.tools.knowledge import knowledge_search
-
+import re
 
 # =============================================================================
 # JSON SCHEMAS DE HERRAMIENTAS
@@ -21,6 +21,32 @@ from src.tools.knowledge import knowledge_search
 # Estos schemas siguen el formato JSON Schema y son los que el LLM
 # "ve" para entender qué parámetros acepta cada herramienta.
 # =============================================================================
+
+# Formato MCP oficial (JSON-RPC 2.0)
+MCP_TOOL_DEFINITION = {
+    "jsonrpc": "2.0",
+    "method": "tools/list",
+    "result": {
+        "tools": [
+            {
+                "name": "crm_lookup",
+                "description": "Busca información de clientes...",
+                "inputSchema": {
+                    "type": "object",
+                    "properties": {
+                        "customer_id": {"type": "string"},
+                        "email": {"type": "string"},
+                    },
+                    "oneOf": [  # ← MCP soporta validación avanzada
+                        {"required": ["customer_id"]},
+                        {"required": ["email"]},
+                        {"required": ["query"]},
+                    ]
+                }
+            }
+        ]
+    }
+}
 
 CRM_LOOKUP_SCHEMA = {
     "name": "crm_lookup",
@@ -225,6 +251,20 @@ def validate_tool_params(tool_name: str, params: dict) -> tuple[bool, str]:
     
     return True, ""
 
+import re
+
+def sanitize_query(query: str) -> str:
+    """Previene path traversal y patrones peligrosos."""
+    dangerous_patterns = [
+        r'\.\.',           # Path traversal
+        r'[<>|;&$]',       # Shell metacharacters
+    ]
+    
+    for pattern in dangerous_patterns:
+        if re.search(pattern, query):
+            raise ValueError(f"Query contiene patrón no permitido")
+    
+    return query.strip()[:500]
 
 def list_available_tools() -> list[str]:
     """Retorna lista de nombres de herramientas disponibles."""

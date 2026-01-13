@@ -96,7 +96,7 @@ agente/
 
 ```bash
 # 1. Clonar el repositorio
-git clone https://github.com/mentorenia/genAISummitWorkshop.git
+git clone https://github.com/dgarrid/genAISummitWorkshop.git
 cd genAISummitWorkshop
 
 # 2. Crear entorno virtual

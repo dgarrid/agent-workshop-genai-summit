@@ -13,10 +13,12 @@ Principio: El agente NUNCA puede gastar más de lo autorizado.
 import uuid
 import json
 import re
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional, Any
 
 import anthropic
+from anthropic import AsyncAnthropic
+
 from tenacity import (
     retry,
     stop_after_attempt,
@@ -132,7 +134,7 @@ class BudgetedOrchestrator:
                           {nombre: {"handler": callable, "schema": dict}}
         """
         self.settings = get_settings()
-        self.client = anthropic.Anthropic(api_key=self.settings.anthropic_api_key)
+        self.client = AsyncAnthropic(api_key=self.settings.anthropic_api_key)
         self.tool_registry = tool_registry or {}
         
         # Estado de sesión (se reinicia en cada process())
@@ -191,7 +193,7 @@ class BudgetedOrchestrator:
         self.total_input_tokens = 0
         self.total_output_tokens = 0
         
-        start_time = datetime.utcnow()
+        start_time = datetime.now(timezone.utc)
         stopped_reason: Optional[str] = None
         final_decision: Optional[Decision] = None
         tool_results: list[ToolResult] = []
@@ -307,7 +309,7 @@ class BudgetedOrchestrator:
             # ─────────────────────────────────────────────────────────────────
             # MÉTRICAS FINALES Y CIERRE
             # ─────────────────────────────────────────────────────────────────
-            end_time = datetime.utcnow()
+            end_time = datetime.now(timezone.utc)
             execution_time_ms = (end_time - start_time).total_seconds() * 1000
             cost_eur = self.total_cost_usd / self.settings.eur_usd_rate
             budget_remaining = self.settings.budget_limit_eur - cost_eur
@@ -393,10 +395,13 @@ class BudgetedOrchestrator:
             
         Returns:
             Decision validada
+
+        
+        ✅ CAMBIO: Ahora usa await con el cliente async
+    
         """
         with timed_operation("llm_call") as timer:
-            # Llamada síncrona (Anthropic SDK no tiene async nativo aún)
-            response = self.client.messages.create(
+            response = await self.client.messages.create(
                 model=self.settings.anthropic_model,
                 max_tokens=4096,
                 system=SYSTEM_PROMPT,

@@ -38,3 +38,4 @@ python-dotenv>=1.0.0       # Carga de variables de entorno
 tenacity>=9.0.0            # Reintentos con backoff exponencial
 streamlit>=1.32.0
 watchdog>=4.0.0
+nest_asyncio>=1.5.0    # Permite ejecutar bucles async en entornos ya con bucle activo (Jupyter, Streamlit)

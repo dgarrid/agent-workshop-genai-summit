@@ -11,9 +11,12 @@ Principio: Si no está logueado, no pasó.
 
 import json
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, Optional, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from src.models.decision import Decision
 from contextlib import contextmanager
 import time
 
@@ -109,7 +112,7 @@ class AuditLogger:
         self.tool_calls: list[dict] = []
         
         # Timestamps
-        self.session_start = datetime.utcnow()
+        self.session_start = datetime.now(timezone.utc)
         self.session_end: Optional[datetime] = None
         
         # Logger estructurado
@@ -165,7 +168,7 @@ class AuditLogger:
         
         event = {
             "event": "session_start",
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc),
             "session_id": self.session_id,
             "request_id": self.request_id,
             "channel": channel,
@@ -190,7 +193,7 @@ class AuditLogger:
     
     def log_session_end(self, reason: str = "completed") -> None:
         """Registra el fin de una sesión."""
-        self.session_end = datetime.utcnow()
+        self.session_end = datetime.now(timezone.utc)
         duration_ms = (self.session_end - self.session_start).total_seconds() * 1000
         
         settings = get_settings()
@@ -245,7 +248,7 @@ class AuditLogger:
         
         event = {
             "event": "iteration_start",
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "session_id": self.session_id,
             "iteration": iteration,
         }
@@ -274,7 +277,7 @@ class AuditLogger:
         
         event = {
             "event": "llm_call",
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc),
             "session_id": self.session_id,
             "iteration": self.iteration_count,
             "input_tokens": input_tokens,
@@ -284,6 +287,9 @@ class AuditLogger:
             "latency_ms": round(latency_ms, 2),
             "cumulative_cost_usd": round(self.total_cost_usd, 6),
             "budget_remaining_eur": round(budget_remaining, 6),
+            # NUEVO: buckets para agregación en dashboards
+            "cost_bucket": self._get_cost_bucket(cost_eur),
+            "latency_bucket": self._get_latency_bucket(latency_ms),        
         }
         
         self._emit("info", "llm_call", event)
@@ -305,11 +311,10 @@ class AuditLogger:
     # -------------------------------------------------------------------------
     def log_decision(self, decision: "Decision") -> None:
         """Registra una decisión del agente."""
-        from src.models.decision import Decision
         
         event = {
             "event": "decision",
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "session_id": self.session_id,
             "iteration": self.iteration_count,
             **decision.to_audit_dict(),
@@ -357,7 +362,7 @@ class AuditLogger:
         
         event = {
             "event": "tool_call",
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc),
             "session_id": self.session_id,
             "iteration": self.iteration_count,
             **tool_record,
@@ -380,7 +385,7 @@ class AuditLogger:
         """Registra que se excedió el presupuesto."""
         event = {
             "event": "budget_exceeded",
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc),
             "session_id": self.session_id,
             "iteration": self.iteration_count,
             "current_cost_eur": round(current_cost_eur, 6),
@@ -399,11 +404,38 @@ class AuditLogger:
             border_style="red",
         ))
     
+# -----------------------------------------------------------------------------
+# 3. BUCKETS PARA MÉTRICAS (opcional, útil para dashboards)
+#    Añadir categorización de costes y latencias para facilitar agregaciones 
+    
+    @staticmethod
+    def _get_cost_bucket(cost_eur: float) -> str:
+        """Categoriza el coste para dashboards."""
+        if cost_eur < 0.001:
+            return "micro"      # < €0.001
+        elif cost_eur < 0.01:
+            return "small"      # €0.001 - €0.01
+        elif cost_eur < 0.1:
+            return "medium"     # €0.01 - €0.1
+        else:
+            return "large"      # > €0.1
+    
+    @staticmethod
+    def _get_latency_bucket(latency_ms: float) -> str:
+        """Categoriza la latencia para dashboards."""
+        if latency_ms < 500:
+            return "fast"       # < 500ms
+        elif latency_ms < 2000:
+            return "normal"     # 500ms - 2s
+        elif latency_ms < 5000:
+            return "slow"       # 2s - 5s
+        else:
+            return "very_slow"  # > 5s
     def log_max_iterations_reached(self, max_iterations: int) -> None:
         """Registra que se alcanzó el máximo de iteraciones."""
         event = {
             "event": "max_iterations_reached",
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc),
             "session_id": self.session_id,
             "iteration": self.iteration_count,
             "max_iterations": max_iterations,
@@ -425,7 +457,7 @@ class AuditLogger:
         """Registra un error."""
         event = {
             "event": "error",
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc),
             "session_id": self.session_id,
             "iteration": self.iteration_count,
             "error_type": type(error).__name__,

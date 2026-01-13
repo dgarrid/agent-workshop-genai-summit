@@ -8,9 +8,9 @@ detiene la ejecución antes de que llegue a producción.
 Principio: El caos probabilístico del LLM se convierte en objetos Python validados.
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
-from typing import Optional, Any
+from typing import Optional, Any, Annotated, Literal, Union
 from pydantic import BaseModel, Field, field_validator, model_validator
 
 
@@ -181,7 +181,7 @@ class Decision(BaseModel):
     )
     
     created_at: datetime = Field(
-        default_factory=datetime.utcnow,
+        default_factory=datetime.now(timezone.utc),
         description="Timestamp de creación",
     )
     
@@ -334,7 +334,7 @@ class AgentResponse(BaseModel):
     # Metadatos
     # -------------------------------------------------------------------------
     created_at: datetime = Field(
-        default_factory=datetime.utcnow,
+        default_factory=datetime.now(timezone.utc),
         description="Timestamp de creación",
     )
     
