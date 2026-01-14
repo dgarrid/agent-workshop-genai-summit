@@ -248,7 +248,7 @@ class AuditLogger:
         
         event = {
             "event": "iteration_start",
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.utcnow().isoformat(),
             "session_id": self.session_id,
             "iteration": iteration,
         }
@@ -477,6 +477,74 @@ class AuditLogger:
             box=box.HEAVY,
             border_style="red",
         ))
+    
+    # =============================================================================
+# AÑADIR ESTE MÉTODO A LA CLASE AuditLogger
+# (después de log_error, antes del cierre de la clase)
+# =============================================================================
+
+def log_event(self, event_type: str, data: dict) -> None:
+    """
+    Registra un evento genérico.
+    
+    Útil para eventos personalizados como alertas de budget,
+    métricas custom, o cualquier evento no cubierto por los
+    métodos específicos.
+    
+    Args:
+        event_type: Tipo de evento (ej: "budget_warning", "custom_metric")
+        data: Datos adicionales del evento
+        
+    Example:
+        >>> audit.log_event("budget_warning", {
+        ...     "threshold": "50%",
+        ...     "current_cost_eur": 2.50,
+        ...     "limit_eur": 5.00,
+        ... })
+    """
+    event = {
+        "event": event_type,
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "session_id": self.session_id,
+        "iteration": self.iteration_count,
+        **data,
+    }
+    
+    # Determinar nivel de log según tipo de evento
+    if "warning" in event_type.lower() or "alert" in event_type.lower():
+        level = "warning"
+    elif "error" in event_type.lower() or "critical" in event_type.lower():
+        level = "error"
+    else:
+        level = "info"
+    
+    self._emit(level, event_type, event)
+    self._persist_event(event)
+    
+    # Visual output según tipo
+    if "budget" in event_type.lower():
+        threshold = data.get("threshold", "N/A")
+        current = data.get("current_cost_eur", 0)
+        limit = data.get("limit_eur", 0)
+        
+        if "critical" in event_type.lower() or "80" in str(threshold):
+            style = "bold red"
+            icon = "🔴"
+        elif "warning" in event_type.lower() or "50" in str(threshold):
+            style = "bold yellow"
+            icon = "🟡"
+        else:
+            style = "bold cyan"
+            icon = "🔵"
+        
+        self.console.print(
+            f"  {icon} [{style}]Budget Alert ({threshold})[/{style}]: "
+            f"€{current:.4f} / €{limit:.2f}"
+        )
+    else:
+        # Evento genérico
+        self.console.print(f"  📌 Event: {event_type}")
+
 
 
 # =============================================================================
